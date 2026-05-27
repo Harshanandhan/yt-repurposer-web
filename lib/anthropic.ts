@@ -7,8 +7,20 @@ export { POST_STYLES };
 const SYSTEM_PROMPT =
   "You are a LinkedIn content strategist who writes high-performing posts. " +
   "Your posts are concise, punchy, and drive engagement. " +
+  "CRITICAL: Never use any markdown formatting — no **bold**, no *italics*, no headings, no bullet dashes, no underscores for emphasis. Plain text only. " +
   "Never use hashtag spam. Max 3 relevant hashtags per post, placed at the end. " +
   "Never start a post with 'I'. Vary your hooks.";
+
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")   // **bold**
+    .replace(/\*(.*?)\*/g, "$1")        // *italic*
+    .replace(/__(.*?)__/g, "$1")        // __bold__
+    .replace(/_(.*?)_/g, "$1")          // _italic_
+    .replace(/^#{1,6}\s+/gm, "")        // # headings
+    .replace(/^[\-\*]\s+/gm, "• ")      // - bullets → •
+    .trim();
+}
 
 export async function generatePosts(
   transcript: string,
@@ -38,7 +50,7 @@ export async function generatePosts(
       });
       return {
         style: style.name,
-        content: (message.content[0] as { text: string }).text.trim(),
+        content: stripMarkdown((message.content[0] as { text: string }).text),
       };
     })
   );
