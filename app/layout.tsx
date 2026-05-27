@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/Header";
 import "./globals.css";
 
@@ -13,13 +12,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${geist.variable} h-full`}>
-        <body className="min-h-full flex flex-col bg-white text-gray-900">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`${geist.variable} h-full`}>
+      <body className="min-h-full flex flex-col bg-white text-gray-900">
+        <Header />
+        <main className="flex-1">{children}</main>
+      </body>
+    </html>
   );
 }

@@ -1,11 +1,8 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { extractVideoId, fetchTranscript } from "@/lib/transcript";
 import { generatePosts } from "@/lib/anthropic";
-import { getOrCreateUser, getUserPlan, saveGeneration } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
   const body = await req.json();
   const { url, topicHint } = body as { url: string; topicHint?: string };
 
@@ -20,18 +17,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid YouTube URL" }, { status: 400 });
   }
 
-  let isPro = false;
-  let dbUserId: string | null = null;
-
-  if (userId) {
-    const clerkUser = await currentUser();
-    const email = clerkUser?.emailAddresses[0]?.emailAddress;
-    const dbUser = await getOrCreateUser(userId, email);
-    dbUserId = dbUser.id;
-    const plan = await getUserPlan(userId);
-    isPro = plan === "pro";
-  }
-
   let transcript: string;
   try {
     transcript = await fetchTranscript(videoId);
@@ -44,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   let posts;
   try {
-    posts = await generatePosts(transcript, isPro, topicHint);
+    posts = await generatePosts(transcript, false, topicHint);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "AI generation failed";
     const isQuota = msg.includes("429") || msg.includes("quota") || msg.includes("Too Many Requests");
@@ -54,9 +39,5 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (dbUserId) {
-    await saveGeneration(dbUserId, videoId, url, posts);
-  }
-
-  return NextResponse.json({ posts, isPro, videoId });
+  return NextResponse.json({ posts, isPro: false, videoId });
 }

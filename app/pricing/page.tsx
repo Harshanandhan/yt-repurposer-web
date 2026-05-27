@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -22,16 +21,12 @@ const PRO_FEATURES = [
 ];
 
 export default function PricingPage() {
-  const { isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const upgrade = async () => {
-    if (!isSignedIn) { router.push("/sign-up"); return; }
     setLoading(true);
-    const res = await fetch("/api/create-checkout", { method: "POST" });
-    const { url } = await res.json();
-    window.location.href = url;
+    router.push("mailto:harshanandhan09@gmail.com?subject=RepurposeAI Pro Upgrade");
   };
 
   return (
