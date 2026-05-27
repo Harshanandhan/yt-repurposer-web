@@ -13,7 +13,6 @@ export type Plan = "free" | "pro";
 
 export interface DbUser {
   id: string;
-  clerk_id: string;
   email: string | null;
   stripe_customer_id: string | null;
   plan: Plan;
@@ -34,19 +33,20 @@ export interface Post {
   content: string;
 }
 
-export async function getOrCreateUser(clerkId: string, email?: string): Promise<DbUser> {
+export async function getOrCreateUser(authId: string, email?: string): Promise<DbUser> {
   const db = getClient();
+
   const { data: existing } = await db
     .from("users")
     .select("*")
-    .eq("clerk_id", clerkId)
+    .eq("id", authId)
     .single();
 
   if (existing) return existing;
 
   const { data, error } = await db
     .from("users")
-    .insert({ clerk_id: clerkId, email: email ?? null })
+    .insert({ id: authId, email: email ?? null })
     .select()
     .single();
 
@@ -54,12 +54,12 @@ export async function getOrCreateUser(clerkId: string, email?: string): Promise<
   return data;
 }
 
-export async function getUserPlan(clerkId: string): Promise<Plan> {
+export async function getUserPlan(authId: string): Promise<Plan> {
   const db = getClient();
   const { data } = await db
     .from("users")
     .select("plan")
-    .eq("clerk_id", clerkId)
+    .eq("id", authId)
     .single();
 
   return (data?.plan as Plan) ?? "free";

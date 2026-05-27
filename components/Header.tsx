@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
+import SignOutButton from "./SignOutButton";
 
-export default function Header() {
+export default async function Header() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 to-indigo-600">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -17,12 +22,30 @@ export default function Header() {
           <Link href="/pricing" className="text-sm text-violet-200 hover:text-white transition-colors">
             Pricing
           </Link>
-          <Link
-            href="/pricing"
-            className="text-sm bg-white text-violet-600 px-4 py-2 rounded-full hover:bg-violet-50 transition-colors font-semibold"
-          >
-            Upgrade to Pro
-          </Link>
+
+          {user ? (
+            <>
+              <Link href="/dashboard" className="text-sm text-violet-200 hover:text-white transition-colors">
+                Dashboard
+              </Link>
+              <span className="text-sm text-violet-300 hidden sm:block truncate max-w-[160px]">
+                {user.email}
+              </span>
+              <SignOutButton />
+            </>
+          ) : (
+            <>
+              <Link href="/sign-in" className="text-sm text-violet-200 hover:text-white transition-colors">
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="text-sm bg-white text-violet-600 px-4 py-2 rounded-full hover:bg-violet-50 transition-colors font-semibold"
+              >
+                Get started free
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
