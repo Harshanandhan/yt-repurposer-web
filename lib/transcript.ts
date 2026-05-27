@@ -27,8 +27,9 @@ export async function fetchTranscript(videoId: string): Promise<string> {
   const apiKey = process.env.SUPADATA_API_KEY;
   if (!apiKey) throw new Error("SUPADATA_API_KEY is not configured");
 
+  const ytUrl = encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`);
   const res = await fetch(
-    `https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}`,
+    `https://api.supadata.ai/v1/youtube/transcript?url=${ytUrl}`,
     { headers: { "x-api-key": apiKey } }
   );
 

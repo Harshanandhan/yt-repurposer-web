@@ -20,9 +20,10 @@ export async function POST(req: NextRequest) {
   let transcript: string;
   try {
     transcript = await fetchTranscript(videoId);
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Could not fetch transcript. The video may have captions disabled." },
+      { error: `Transcript error: ${msg}` },
       { status: 422 }
     );
   }
