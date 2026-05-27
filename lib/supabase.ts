@@ -91,6 +91,21 @@ export async function getTodayGenerationCount(userId: string): Promise<number> {
   return count ?? 0;
 }
 
+export async function getGenerationById(
+  id: string,
+  userId: string
+): Promise<Generation | null> {
+  const db = getClient();
+  const { data } = await db
+    .from("generations")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .single();
+
+  return data ?? null;
+}
+
 export async function getUserGenerations(userId: string): Promise<Generation[]> {
   const db = getClient();
   const { data } = await db

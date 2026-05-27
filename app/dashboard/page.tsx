@@ -95,18 +95,19 @@ export default async function DashboardPage() {
           ) : (
             <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
               {/* Table header */}
-              <div className="grid grid-cols-[3rem_1fr_auto_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div className="grid grid-cols-[3rem_1fr_auto_auto_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <div>#</div>
                 <div>Video</div>
                 <div className="text-center">Posts</div>
                 <div>Date</div>
+                <div></div>
               </div>
 
               {/* Table rows */}
               {generations.map((gen, i) => (
                 <div
                   key={gen.id}
-                  className={`grid grid-cols-[3rem_1fr_auto_auto] gap-4 px-5 py-4 items-center ${
+                  className={`grid grid-cols-[3rem_1fr_auto_auto_auto] gap-4 px-5 py-4 items-center ${
                     i < generations.length - 1 ? "border-b border-gray-100" : ""
                   } hover:bg-gray-50/50 transition-colors`}
                 >
@@ -156,6 +157,14 @@ export default async function DashboardPage() {
                       year: "numeric",
                     })}
                   </div>
+
+                  {/* View posts */}
+                  <Link
+                    href={`/dashboard/${gen.id}`}
+                    className="text-xs font-semibold text-violet-600 hover:text-violet-700 border border-violet-200 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                  >
+                    View posts
+                  </Link>
                 </div>
               ))}
 
