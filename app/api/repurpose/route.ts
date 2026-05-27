@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
       // Rate limit: free users get 1 generation per day
       if (!isPro) {
         const todayCount = await getTodayGenerationCount(userId);
-        if (todayCount >= 1) {
+        if (todayCount >= 5) {
           return NextResponse.json(
             {
               error:
-                "You've used your 1 free generation for today. Upgrade to Pro for unlimited videos.",
+                "You've used your 5 free generations for today. Upgrade to Pro for unlimited videos.",
             },
             { status: 429 }
           );

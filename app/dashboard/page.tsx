@@ -41,7 +41,7 @@ export default async function DashboardPage() {
                 ? "bg-white/20 text-white border-white/30"
                 : "bg-white/10 text-violet-200 border-white/20"
             }`}>
-              {plan === "pro" ? "Pro — unlimited" : "Free — 1 video/day"}
+              {plan === "pro" ? "Pro — unlimited" : "Free — 5 videos/day"}
             </span>
             {plan === "free" && (
               <Link
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
             <span className="text-sm text-gray-500">Posts generated</span>
           </div>
           <div className="flex flex-col items-center gap-0.5 text-center px-6">
-            <span className="text-3xl font-bold text-violet-600">{plan === "pro" ? "∞" : "1/day"}</span>
+            <span className="text-3xl font-bold text-violet-600">{plan === "pro" ? "∞" : "5/day"}</span>
             <span className="text-sm text-gray-500">Daily limit</span>
           </div>
         </div>
