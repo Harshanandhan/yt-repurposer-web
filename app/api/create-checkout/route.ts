@@ -1,16 +1,27 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { createCheckoutSession } from "@/lib/stripe";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getOrCreateUser } from "@/lib/supabase";
+import { createCheckoutSession } from "@/lib/stripe";
 
 export async function POST() {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const clerkUser = await currentUser();
-  const email = clerkUser?.emailAddresses[0]?.emailAddress ?? "";
-  const dbUser = await getOrCreateUser(userId, email);
+  if (!user) {
+    return NextResponse.json({ error: "You must be signed in to upgrade." }, { status: 401 });
+  }
 
-  const session = await createCheckoutSession(userId, email, dbUser.stripe_customer_id);
+  const dbUser = await getOrCreateUser(user.id, user.email ?? undefined);
+
+  if (dbUser.plan === "pro") {
+    return NextResponse.json({ error: "Already on Pro plan." }, { status: 400 });
+  }
+
+  const session = await createCheckoutSession(
+    user.id,
+    user.email ?? "",
+    dbUser.stripe_customer_id
+  );
+
   return NextResponse.json({ url: session.url });
 }

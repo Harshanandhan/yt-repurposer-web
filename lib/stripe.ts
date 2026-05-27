@@ -9,7 +9,7 @@ function getStripe() {
 export { getStripe as stripe };
 
 export async function createCheckoutSession(
-  clerkId: string,
+  authId: string,
   email: string,
   stripeCustomerId: string | null
 ) {
@@ -21,7 +21,7 @@ export async function createCheckoutSession(
     line_items: [{ price: process.env.STRIPE_PRO_PRICE_ID!, quantity: 1 }],
     success_url: `${baseUrl}/dashboard?upgrade=success`,
     cancel_url: `${baseUrl}/pricing`,
-    metadata: { clerk_id: clerkId },
+    metadata: { auth_id: authId },
   };
 
   if (stripeCustomerId) {
@@ -31,4 +31,14 @@ export async function createCheckoutSession(
   }
 
   return client.checkout.sessions.create(params);
+}
+
+export async function createPortalSession(stripeCustomerId: string) {
+  const client = getStripe();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  return client.billingPortal.sessions.create({
+    customer: stripeCustomerId,
+    return_url: `${baseUrl}/dashboard`,
+  });
 }

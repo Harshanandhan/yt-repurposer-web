@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getUserGenerations, getUserPlan } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import ManageSubscriptionButton from "./ManageSubscriptionButton";
 
 const STYLE_COLORS: Record<string, string> = {
   story:    "bg-blue-50 text-blue-700 border-blue-200",
@@ -11,7 +12,12 @@ const STYLE_COLORS: Record<string, string> = {
   how_to:   "bg-violet-50 text-violet-700 border-violet-200",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgrade?: string }>;
+}) {
+  const { upgrade } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -26,6 +32,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-[80vh]">
+
+      {/* Upgrade success banner */}
+      {upgrade === "success" && (
+        <div className="bg-green-50 border-b border-green-200 px-6 py-3 text-center">
+          <p className="text-sm text-green-700 font-medium">
+            🎉 You&apos;re now on Pro — enjoy unlimited videos!
+          </p>
+        </div>
+      )}
 
       {/* Header banner */}
       <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-12">
@@ -43,13 +58,15 @@ export default async function DashboardPage() {
             }`}>
               {plan === "pro" ? "Pro — unlimited" : "Free — 5 videos/day"}
             </span>
-            {plan === "free" && (
+            {plan === "free" ? (
               <Link
                 href="/pricing"
                 className="text-sm bg-white text-violet-600 px-4 py-2 rounded-full hover:bg-violet-50 transition-colors font-semibold"
               >
                 Upgrade to Pro
               </Link>
+            ) : (
+              <ManageSubscriptionButton />
             )}
           </div>
         </div>
