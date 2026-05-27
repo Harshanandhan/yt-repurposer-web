@@ -10,7 +10,11 @@ import {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { url, topicHint } = body as { url: string; topicHint?: string };
+  const { url, topicHint, selectedStyles } = body as {
+    url: string;
+    topicHint?: string;
+    selectedStyles?: string[];
+  };
 
   if (!url) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
   // Signed-in users always get all 5 styles. Anonymous users get 2.
   let posts;
   try {
-    posts = await generatePosts(transcript, isSignedIn, topicHint);
+    posts = await generatePosts(transcript, isSignedIn, topicHint, selectedStyles);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "AI generation failed";
     const isQuota =

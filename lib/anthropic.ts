@@ -25,10 +25,14 @@ function stripMarkdown(text: string): string {
 export async function generatePosts(
   transcript: string,
   isPro: boolean,
-  topicHint?: string
+  topicHint?: string,
+  selectedStyles?: string[]
 ): Promise<Post[]> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const styles = POST_STYLES.filter((s) => isPro || !s.proOnly);
+  let styles = POST_STYLES.filter((s) => isPro || !s.proOnly);
+  if (selectedStyles && selectedStyles.length > 0) {
+    styles = styles.filter((s) => selectedStyles.includes(s.name));
+  }
   const topicLine = topicHint ? `The video is about: ${topicHint}\n\n` : "";
   const excerpt = transcript.slice(0, 8000);
 
