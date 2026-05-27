@@ -17,7 +17,7 @@ interface SupadataChunk {
 }
 
 interface SupadataResponse {
-  content?: string;
+  content?: string | SupadataChunk[];
   chunks?: SupadataChunk[];
   lang?: string;
   error?: string;
@@ -42,9 +42,14 @@ export async function fetchTranscript(videoId: string): Promise<string> {
 
   if (data.error) throw new Error(data.error);
 
-  const text =
-    data.content?.trim() ||
-    data.chunks?.map((c) => c.text).join(" ").trim();
+  let text = "";
+  if (typeof data.content === "string") {
+    text = data.content.trim();
+  } else if (Array.isArray(data.content)) {
+    text = data.content.map((c) => c.text).join(" ").trim();
+  } else if (Array.isArray(data.chunks)) {
+    text = data.chunks.map((c) => c.text).join(" ").trim();
+  }
 
   if (!text) throw new Error("No transcript content found for this video");
   return text;
