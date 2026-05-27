@@ -21,9 +21,10 @@ export async function POST(req: NextRequest) {
   try {
     transcript = await fetchTranscript(videoId);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    const isNoCaptions = msg.toLowerCase().includes("caption") || msg.toLowerCase().includes("transcript");
     return NextResponse.json(
-      { error: `Transcript error: ${msg}` },
+      { error: isNoCaptions ? msg : "Could not fetch transcript. The video may have captions disabled." },
       { status: 422 }
     );
   }
