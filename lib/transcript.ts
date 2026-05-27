@@ -28,29 +28,39 @@ export async function fetchTranscript(videoId: string): Promise<string> {
   if (!apiKey) throw new Error("SUPADATA_API_KEY is not configured");
 
   const ytUrl = encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`);
-  const res = await fetch(
-    `https://api.supadata.ai/v1/youtube/transcript?url=${ytUrl}`,
-    { headers: { "x-api-key": apiKey } }
-  );
+  const url = `https://api.supadata.ai/v1/youtube/transcript?url=${ytUrl}`;
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Transcript service error ${res.status}${body ? `: ${body}` : ""}`);
+  const MAX_ATTEMPTS = 3;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, attempt * 1500));
+
+    const res = await fetch(url, { headers: { "x-api-key": apiKey } });
+
+    if (res.status === 503 || res.status === 429) {
+      if (attempt < MAX_ATTEMPTS - 1) continue;
+      throw new Error("Transcript service is temporarily busy. Please try again in a moment.");
+    }
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Transcript service error ${res.status}${body ? `: ${body}` : ""}`);
+    }
+
+    const data = (await res.json()) as SupadataResponse;
+    if (data.error) throw new Error(data.error);
+
+    let text = "";
+    if (typeof data.content === "string") {
+      text = data.content.trim();
+    } else if (Array.isArray(data.content)) {
+      text = data.content.map((c) => c.text).join(" ").trim();
+    } else if (Array.isArray(data.chunks)) {
+      text = data.chunks.map((c) => c.text).join(" ").trim();
+    }
+
+    if (!text) throw new Error("No transcript content found for this video");
+    return text;
   }
 
-  const data = (await res.json()) as SupadataResponse;
-
-  if (data.error) throw new Error(data.error);
-
-  let text = "";
-  if (typeof data.content === "string") {
-    text = data.content.trim();
-  } else if (Array.isArray(data.content)) {
-    text = data.content.map((c) => c.text).join(" ").trim();
-  } else if (Array.isArray(data.chunks)) {
-    text = data.chunks.map((c) => c.text).join(" ").trim();
-  }
-
-  if (!text) throw new Error("No transcript content found for this video");
-  return text;
+  throw new Error("Transcript service is temporarily busy. Please try again in a moment.");
 }
