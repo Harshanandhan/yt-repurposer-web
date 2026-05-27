@@ -3,6 +3,14 @@ import { getUserGenerations, getUserPlan } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+const STYLE_COLORS: Record<string, string> = {
+  story:    "bg-blue-50 text-blue-700 border-blue-200",
+  insight:  "bg-emerald-50 text-emerald-700 border-emerald-200",
+  listicle: "bg-amber-50 text-amber-700 border-amber-200",
+  hot_take: "bg-red-50 text-red-700 border-red-200",
+  how_to:   "bg-violet-50 text-violet-700 border-violet-200",
+};
+
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,16 +22,18 @@ export default async function DashboardPage() {
     getUserPlan(user.id),
   ]);
 
+  const totalPosts = generations.reduce((sum, g) => sum + g.posts.length, 0);
+
   return (
     <div className="flex flex-col min-h-[80vh]">
-      {/* Header */}
+
+      {/* Header banner */}
       <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-12">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-violet-200 text-sm font-medium mb-1">Your dashboard</p>
-            <h1 className="text-3xl font-bold text-white">
-              {generations.length} video{generations.length !== 1 ? "s" : ""} repurposed
-            </h1>
+            <p className="text-violet-200 text-sm font-medium mb-1">Welcome back</p>
+            <h1 className="text-3xl font-bold text-white">Your dashboard</h1>
+            <p className="text-violet-300 text-sm mt-1">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
@@ -31,7 +41,7 @@ export default async function DashboardPage() {
                 ? "bg-white/20 text-white border-white/30"
                 : "bg-white/10 text-violet-200 border-white/20"
             }`}>
-              {plan === "pro" ? "Pro plan" : "Free plan"}
+              {plan === "pro" ? "Pro — unlimited" : "Free — 1 video/day"}
             </span>
             {plan === "free" && (
               <Link
@@ -45,9 +55,27 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 px-6 py-10">
-        <div className="max-w-4xl mx-auto">
+      {/* Stats */}
+      <div className="bg-indigo-50 border-b border-indigo-100 px-6 py-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-3 divide-x divide-indigo-200">
+          <div className="flex flex-col items-center gap-0.5 text-center px-6">
+            <span className="text-3xl font-bold text-violet-600">{generations.length}</span>
+            <span className="text-sm text-gray-500">Videos repurposed</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 text-center px-6">
+            <span className="text-3xl font-bold text-violet-600">{totalPosts}</span>
+            <span className="text-sm text-gray-500">Posts generated</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5 text-center px-6">
+            <span className="text-3xl font-bold text-violet-600">{plan === "pro" ? "∞" : "1/day"}</span>
+            <span className="text-sm text-gray-500">Daily limit</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="flex-1 px-6 py-8">
+        <div className="max-w-5xl mx-auto">
           {generations.length === 0 ? (
             <div className="text-center py-20 flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center">
@@ -65,48 +93,84 @@ export default async function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              {generations.map((gen) => (
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+              {/* Table header */}
+              <div className="grid grid-cols-[3rem_1fr_auto_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div>#</div>
+                <div>Video</div>
+                <div className="text-center">Posts</div>
+                <div>Date</div>
+              </div>
+
+              {/* Table rows */}
+              {generations.map((gen, i) => (
                 <div
                   key={gen.id}
-                  className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-start gap-4 hover:shadow-sm transition-shadow"
+                  className={`grid grid-cols-[3rem_1fr_auto_auto] gap-4 px-5 py-4 items-center ${
+                    i < generations.length - 1 ? "border-b border-gray-100" : ""
+                  } hover:bg-gray-50/50 transition-colors`}
                 >
-                  {/* YouTube thumbnail */}
-                  <img
-                    src={`https://img.youtube.com/vi/${gen.video_id}/mqdefault.jpg`}
-                    alt="Video thumbnail"
-                    className="w-full sm:w-36 h-24 sm:h-20 object-cover rounded-xl shrink-0 bg-gray-100"
-                  />
+                  {/* Row number */}
+                  <div className="text-sm font-semibold text-gray-400">{i + 1}</div>
 
-                  <div className="flex-1 min-w-0">
-                    <a
-                      href={gen.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-violet-600 hover:underline break-all"
-                    >
-                      {gen.video_url}
-                    </a>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(gen.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {gen.posts.map((post) => (
-                        <span
-                          key={post.style}
-                          className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium capitalize"
-                        >
-                          {post.style.replace("_", " ")}
-                        </span>
-                      ))}
+                  {/* Video info */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={`https://img.youtube.com/vi/${gen.video_id}/mqdefault.jpg`}
+                      alt=""
+                      className="w-20 h-12 object-cover rounded-lg shrink-0 bg-gray-100"
+                    />
+                    <div className="min-w-0">
+                      <a
+                        href={gen.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-violet-600 hover:underline font-medium block truncate"
+                      >
+                        {gen.video_url}
+                      </a>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {gen.posts.map((post) => (
+                          <span
+                            key={post.style}
+                            className={`text-xs px-1.5 py-0.5 rounded-full border font-medium capitalize ${STYLE_COLORS[post.style] ?? "bg-gray-50 text-gray-600 border-gray-200"}`}
+                          >
+                            {post.style.replace("_", " ")}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Post count */}
+                  <div className="text-center">
+                    <span className="text-sm font-bold text-gray-900">{gen.posts.length}</span>
+                    <span className="text-xs text-gray-400 block">posts</span>
+                  </div>
+
+                  {/* Date */}
+                  <div className="text-sm text-gray-500 whitespace-nowrap">
+                    {new Date(gen.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </div>
                 </div>
               ))}
+
+              {/* Footer */}
+              <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                <p className="text-xs text-gray-400">
+                  {generations.length} video{generations.length !== 1 ? "s" : ""} · {totalPosts} posts total
+                </p>
+                <Link
+                  href="/"
+                  className="text-xs font-semibold text-violet-600 hover:text-violet-700"
+                >
+                  + Repurpose another video
+                </Link>
+              </div>
             </div>
           )}
         </div>

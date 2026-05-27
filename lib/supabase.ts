@@ -77,6 +77,20 @@ export async function saveGeneration(
     .insert({ user_id: userId, video_id: videoId, video_url: videoUrl, posts });
 }
 
+export async function getTodayGenerationCount(userId: string): Promise<number> {
+  const db = getClient();
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const { count } = await db
+    .from("generations")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", startOfDay.toISOString());
+
+  return count ?? 0;
+}
+
 export async function getUserGenerations(userId: string): Promise<Generation[]> {
   const db = getClient();
   const { data } = await db
