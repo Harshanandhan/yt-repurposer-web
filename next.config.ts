@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["@anthropic-ai/sdk", "youtube-transcript", "stripe", "@supabase/supabase-js"],
 };
 
 export default nextConfig;
