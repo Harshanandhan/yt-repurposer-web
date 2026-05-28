@@ -16,9 +16,9 @@ const STYLE_COLORS: Record<string, string> = {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ upgrade?: string }>;
+  searchParams: Promise<{ upgrade?: string; reset?: string }>;
 }) {
-  const { upgrade } = await searchParams;
+  const { upgrade, reset } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -37,6 +37,15 @@ export default async function DashboardPage({
       {/* Email verification banner */}
       {!user.email_confirmed_at && (
         <VerifyEmailBanner email={user.email ?? ""} />
+      )}
+
+      {/* Password reset success banner */}
+      {reset === "success" && (
+        <div className="bg-green-50 border-b border-green-200 px-6 py-3 text-center">
+          <p className="text-sm text-green-700 font-medium">
+            Password updated successfully.
+          </p>
+        </div>
       )}
 
       {/* Upgrade success banner */}
