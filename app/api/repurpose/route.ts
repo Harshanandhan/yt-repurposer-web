@@ -37,12 +37,19 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
+      if (!user.email_confirmed_at) {
+        return NextResponse.json(
+          { error: "Please verify your email address before generating posts. Check your inbox for a confirmation link." },
+          { status: 403 }
+        );
+      }
+
       const dbUser = await getOrCreateUser(user.id, user.email ?? undefined);
       isPro = dbUser.plan === "pro";
       isSignedIn = true;
       userId = dbUser.id;
 
-      // Rate limit: free users get 1 generation per day
+      // Rate limit: free users get 5 generations per day
       if (!isPro) {
         const todayCount = await getTodayGenerationCount(userId);
         if (todayCount >= 5) {

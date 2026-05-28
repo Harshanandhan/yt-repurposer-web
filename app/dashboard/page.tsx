@@ -3,6 +3,7 @@ import { getUserGenerations, getUserPlan } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ManageSubscriptionButton from "./ManageSubscriptionButton";
+import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 
 const STYLE_COLORS: Record<string, string> = {
   story:    "bg-blue-50 text-blue-700 border-blue-200",
@@ -32,6 +33,11 @@ export default async function DashboardPage({
 
   return (
     <div className="flex flex-col min-h-[80vh]">
+
+      {/* Email verification banner */}
+      {!user.email_confirmed_at && (
+        <VerifyEmailBanner email={user.email ?? ""} />
+      )}
 
       {/* Upgrade success banner */}
       {upgrade === "success" && (

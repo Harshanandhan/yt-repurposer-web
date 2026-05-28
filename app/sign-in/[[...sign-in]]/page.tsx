@@ -11,17 +11,30 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+
+  const resendVerification = async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.resend({ type: "signup", email });
+    setResendSent(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setUnconfirmed(false);
 
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setUnconfirmed(true);
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -44,6 +57,25 @@ export default function SignInPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
               {error}
+            </div>
+          )}
+
+          {unconfirmed && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-xl flex flex-col gap-2">
+              <p className="font-medium">Email not verified</p>
+              <p>Check your inbox for a confirmation link, or{" "}
+                {resendSent ? (
+                  <span className="font-semibold">email sent!</span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={resendVerification}
+                    className="underline font-semibold hover:text-amber-900"
+                  >
+                    resend it
+                  </button>
+                )}
+              </p>
             </div>
           )}
 
