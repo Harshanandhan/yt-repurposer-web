@@ -35,7 +35,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6">
           <div className="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            AI-powered content repurposing
+            AI-powered · repostly.org
           </div>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
             Turn YouTube videos into{" "}
@@ -164,7 +164,7 @@ export default function Home() {
           <p className="text-sm text-violet-300">
             Want all 5 styles?{" "}
             <Link href="/pricing" className="text-white underline underline-offset-2 hover:text-violet-100">
-              Upgrade to Pro for $19/mo
+              Upgrade to Repostly Pro — $19/mo
             </Link>
           </p>
         </div>

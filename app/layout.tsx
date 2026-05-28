@@ -6,7 +6,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
-  title: "RepurposeAI — YouTube to LinkedIn in 30 seconds",
+  title: "Repostly — YouTube to LinkedIn in 30 seconds",
   description: "Turn any YouTube video into 5 high-performing LinkedIn posts using AI. Free to start.",
 };
 

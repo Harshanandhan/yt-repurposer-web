@@ -15,7 +15,7 @@ export default async function Header() {
               <path d="M3 4h10M3 8h7M3 12h5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </div>
-          <span className="font-bold text-white text-lg">RepurposeAI</span>
+          <span className="font-bold text-white text-lg">Repostly</span>
         </Link>
 
         <nav className="flex items-center gap-6">

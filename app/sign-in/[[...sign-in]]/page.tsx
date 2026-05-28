@@ -34,7 +34,7 @@ export default function SignInPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 mt-1 text-sm">Sign in to your RepurposeAI account</p>
+          <p className="text-gray-500 mt-1 text-sm">Sign in to your Repostly account</p>
         </div>
 
         <form
